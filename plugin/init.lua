@@ -24,4 +24,10 @@ vim.api.nvim_set_keymap("n",
                         ":lua require('nvim-ev3').run_ev3_project()<CR>",
                         { silent = true }
 )
+-- Show battery voltage
+vim.api.nvim_set_keymap("n",
+                        "<leader>eb",
+                        ":lua require('nvim-ev3').check_battery()<CR>",
+                        { silent = true }
+)
 

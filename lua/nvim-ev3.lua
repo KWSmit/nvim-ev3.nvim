@@ -1,32 +1,4 @@
--- Local helper functions
-
-local function exists(file)
-   local ok, err, code = os.rename(file, file)
-   if not ok then
-      if code == 13 then
-         -- Permission denied, but it exists
-         return true
-      end
-   end
-   return ok, err
-end
-
-local function isdir(path)
-    return exists(path .. "/")
-end
-
-function split_string (inputstr, sep)
-   if sep == nil then
-      sep = "%s"
-   end
-   local t={}
-   for str in string.gmatch(inputstr, "([^"..sep.."]+)") do
-      table.insert(t, str)
-   end
-   return t
-end
-
--- Public functions
+local utils = require "nvim-ev3.utils"
 
 local M = {}
 
@@ -55,17 +27,17 @@ local function read_project_file(project_file)
     f = io.open(project_file, "r")
     -- Read user
     line = f:read("*l")
-    line = split_string(line, "=")
+    line = utils.split_string(line, "=")
     user = line[2]
     -- Read host
     line = f:read("*l")
-    line = split_string(line, "=")
+    line = utils.split_string(line, "=")
     host = line[2]
     -- Read interpreter, first read lines with dir and SCRIPT
     line = f:read("*l")
     line = f:read("*l")
     line = f:read("*l")
-    line = split_string(line, "=")
+    line = utils.split_string(line, "=")
     interpreter = line[2]
     io.close(f)
     return user, host, interpreter
@@ -85,6 +57,38 @@ local function write_main_python()
     main_file = base_projects_dir .. project_name .. '/main.py'
     f = io.open(main_file, 'w')
     f:write(python_code)
+    io.close(f)
+end
+
+local function write_main_micro_python()
+    -- Write main.py for micro-python interpreter
+    micro_python_code = 
+    "#!/usr/bin/env pybricks-micropython \n" ..
+    "# \n" ..
+    "# Name:        main.py \n" ..
+    "# Description:  \n" ..
+    "# Author:       \n" ..
+    "# Version:      \n" ..
+    "# Date:         \n" ..
+    "# \n" ..
+    "from pybricks.hubs import EV3Brick \n" ..
+    "from pybricks.ev3devices import (Motor, TouchSensor, ColorSensor, \n" ..
+    "                                 InfraredSensor, UltrasonicSensor, GyroSensor) \n" ..
+    "from pybricks.parameters import Port, Stop, Direction, Button, Color \n" ..
+    "from pybricks.tools import wait, StopWatch, DataLog \n" ..
+    "from pybricks.robotics import DriveBase \n" ..
+    "from pybricks.media.ev3dev import SoundFile, ImageFile \n" ..
+    "\n" ..
+    "\n" ..
+    "# Create your objects here. \n" ..
+    "ev3 = EV3Brick()\n " ..
+    "\n" ..
+    "\n" ..
+    "# Write your program here. \n" ..
+    "ev3.speaker.beep()\n"
+    main_file = base_projects_dir .. project_name .. '/main.py'
+    f = io.open(main_file, 'w')
+    f:write(micro_python_code)
     io.close(f)
 end
 
@@ -157,8 +161,7 @@ function M.create_ev3_project()
         if (interpreter == 'python') then
             write_main_python()
         else
-            write_main_python()
-            -- TODO add function write_main_micro-python()
+            write_main_micro_python()
         end
     end
 end
@@ -178,6 +181,7 @@ function M.open_ev3_project()
             project_name = input
             project_file = base_projects_dir .. project_name .. "/.project.ini"
             user, host, interpreter = read_project_file(project_file)
+            print("  -  Project " .. project_name .. " successfully opened")
             project_loaded = true
         else
             print("You cancelled")
@@ -202,14 +206,33 @@ end
 
 function M.run_ev3_project()
     -- Run project on EV3 device
-    if (interpreter == 'python') then
-        os.execute('ssh ' .. user .. '@' .. host  .. ' python3 /home/' ..
-                   user .. '/' .. project_name .. '/main.py')
+    if (project_loaded == false) then
+        print("First open an EV3-project!")
     else
-        os.execute('ssh ' .. user .. '@' .. host  ..
-                   ' brickrun -r -- pybricks-micropython /home/' ..
-                   user .. '/' .. project_name .. '/main.py')
+        if (interpreter == 'python') then
+            os.execute('ssh ' .. user .. '@' .. host  .. ' python3 /home/' ..
+                       user .. '/' .. project_name .. '/main.py')
+        else
+            os.execute('ssh ' .. user .. '@' .. host  ..
+                       ' brickrun -r -- pybricks-micropython /home/' ..
+                       user .. '/' .. project_name .. '/main.py')
+        end
+        print("Done")
+    end
+end
+
+function M.check_battery()
+    -- Check the current voltage of EV3 check_battery
+    if (project_loaded == false) then
+        print("First open an EV3-project!")
+    else
+       local handle = io.popen('scp -l 2000 robot@192.168.2.14:/sys/class/power_supply/lego-ev3-battery/voltage_now /dev/stdout')
+       local result = handle:read(7)
+       result = tonumber(result) / 10e5
+       print("Current battery voltage: " .. result .. "volt")
+       handle.close()
     end
 end
 
 return M
+
