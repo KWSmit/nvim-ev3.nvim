@@ -102,23 +102,29 @@ end
 
 function M.open_ev3_project()
     -- Open an existing EV3 project
-    -- TODO: let user select from list of project instead of typing manually
-    -- See: https://alpha2phi.medium.com/neovim-for-beginners-user-interface-568879ecfd6d
     -- Set pwd to base_projects_dir
     vim.cmd('cd' .. base_projects_dir)
-    -- Ask user for project_name
-    vim.ui.input({
-        prompt = "Enter project name: ",
-    }, function(input)
-        if input then
-            -- Read data from project_file
-            project_name = input
+    -- Get all project directories in base_projects_dir
+    dir_list = {}
+    for dir in io.popen('ls -d ' .. base_projects_dir .. '*'):lines() do
+        -- print(dir)
+        table.insert(dir_list, vim.fn.fnamemodify(dir, ':t'))
+    end
+    -- Let user select desired project
+    vim.ui.select( dir_list, {
+        prompt = "Select a project",
+        format_item = function(item)
+            return item
+        end,
+    }, function(dir, idx)
+        if dir then
+            project_name = dir
             project_file = base_projects_dir .. project_name .. "/.project.ini"
             user, host, interpreter = pt.read_project_file(project_file)
             print("  -  Project " .. project_name .. " successfully opened")
             project_loaded = true
         else
-            print("You cancelled")
+            print "You cancelled"
         end
     end)
 end
