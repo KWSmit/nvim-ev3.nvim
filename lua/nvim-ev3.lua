@@ -1,4 +1,5 @@
 local utils = require "nvim-ev3.utils"
+local pt = require "nvim-ev3.project_tools"
 
 local M = {}
 
@@ -9,88 +10,6 @@ local host = ""
 local interpreter = ""
 local project_loaded = false
 
-local function write_project_file(user, host, project_name, interpreter)
-    -- Write data to project file
-    project_file = base_projects_dir .. project_name .. "/.project.ini"
-    f = io.open(project_file, "w")
-    io.output(f)
-    io.write("USER=" .. user .. "\n")
-    io.write("HOST=" .. host .. "\n")
-    io.write("DIR=home/" .. user .. "/" .. project_name .. "\n")
-    io.write("SCRIPT=main.py" .. "\n")
-    io.write("INTERPRETER=" .. interpreter)
-    io.close(f)
-end
-
-local function read_project_file(project_file)
-    --- Read data from project_file
-    f = io.open(project_file, "r")
-    -- Read user
-    line = f:read("*l")
-    line = utils.split_string(line, "=")
-    user = line[2]
-    -- Read host
-    line = f:read("*l")
-    line = utils.split_string(line, "=")
-    host = line[2]
-    -- Read interpreter, first read lines with dir and SCRIPT
-    line = f:read("*l")
-    line = f:read("*l")
-    line = f:read("*l")
-    line = utils.split_string(line, "=")
-    interpreter = line[2]
-    io.close(f)
-    return user, host, interpreter
-end
-
-local function write_main_python()
-    -- Write main.py for python interpreter
-    python_code = 
-    "#!/user/bin/env python3 \n" ..
-    "# \n" ..
-    "# Name:        main.py \n" ..
-    "# Description:  \n" ..
-    "# Author:       \n" ..
-    "# Version:      \n" ..
-    "# Date:         \n" ..
-    "# \n"
-    main_file = base_projects_dir .. project_name .. '/main.py'
-    f = io.open(main_file, 'w')
-    f:write(python_code)
-    io.close(f)
-end
-
-local function write_main_micro_python()
-    -- Write main.py for micro-python interpreter
-    micro_python_code = 
-    "#!/usr/bin/env pybricks-micropython \n" ..
-    "# \n" ..
-    "# Name:        main.py \n" ..
-    "# Description:  \n" ..
-    "# Author:       \n" ..
-    "# Version:      \n" ..
-    "# Date:         \n" ..
-    "# \n" ..
-    "from pybricks.hubs import EV3Brick \n" ..
-    "from pybricks.ev3devices import (Motor, TouchSensor, ColorSensor, \n" ..
-    "                                 InfraredSensor, UltrasonicSensor, GyroSensor) \n" ..
-    "from pybricks.parameters import Port, Stop, Direction, Button, Color \n" ..
-    "from pybricks.tools import wait, StopWatch, DataLog \n" ..
-    "from pybricks.robotics import DriveBase \n" ..
-    "from pybricks.media.ev3dev import SoundFile, ImageFile \n" ..
-    "\n" ..
-    "\n" ..
-    "# Create your objects here. \n" ..
-    "ev3 = EV3Brick()\n " ..
-    "\n" ..
-    "\n" ..
-    "# Write your program here. \n" ..
-    "ev3.speaker.beep()\n"
-    main_file = base_projects_dir .. project_name .. '/main.py'
-    f = io.open(main_file, 'w')
-    f:write(micro_python_code)
-    io.close(f)
-end
 
 function M.create_ev3_project()
     -- Create a new project for EV3
@@ -140,30 +59,45 @@ function M.create_ev3_project()
             interpreter = "micro-python"
         end
     end)
-    -- Create project directory, first check if directory already exists
-    if isdir(project_name) then
-        -- Project already exists, ask user to overwrite or not
+    -- Check if it's a new or an existing project
+    if utils.isdir(project_name) then
+        -- Existing project
+        new_project = false
+        -- Ask user to overwrite project or not
         vim.ui.input({
             prompt = "Project already exists! Overwrite? [y,N]: "
         }, function(input)
             if input == "y" then
-                -- Overwrite project_file in existing directory
-                write_project_file(username, host, project_name, interpreter)
-                -- Add main.py to project directory
-                write_main_python()
+                overwrite = true
+            else
+                overwrite = false
             end
         end)
     else
-       -- Project does not exist create directory and write project_file
+        -- Directory does not exist, so it's a new project
+        new_project = true
+    end
+    -- If it's a new project: create project directory
+    if new_project then
         os.execute('mkdir ' .. project_name)
-        write_project_file(username, host, project_name, interpreter)
-        -- Add main.py to project directory
+        print('mkdir ' .. project_name)
+    end
+    -- Write project data for new project or overwrite existing project
+    -- TODO clear all files in case of existing project
+    if new_project or overwrite then
+        -- Write project file (.project.ini)
+        project_file = base_projects_dir .. project_name .. '/.project.ini'
+        pt.write_project_file(project_file, project_name,
+                              username, host, interpreter)
+        -- Write empty main file (main.py)
         if (interpreter == 'python') then
-            write_main_python()
+            pt.write_main_python(base_projects_dir, project_name)
         else
-            write_main_micro_python()
+            pt.write_main_micro_python(base_projects_dir, project_name)
         end
     end
+    -- Done, project is loaded
+    project_loaded = true
 end
 
 function M.open_ev3_project()
@@ -180,7 +114,7 @@ function M.open_ev3_project()
             -- Read data from project_file
             project_name = input
             project_file = base_projects_dir .. project_name .. "/.project.ini"
-            user, host, interpreter = read_project_file(project_file)
+            user, host, interpreter = pt.read_project_file(project_file)
             print("  -  Project " .. project_name .. " successfully opened")
             project_loaded = true
         else
@@ -197,7 +131,6 @@ function M.upload_ev3_project()
        local handle = io.popen('rsync -auv --exclude=.project.ini ' .. 
                                project_name .. '/ ' .. user .. '@' .. host .. 
                                ':/home/' .. user .. '/'  .. project_name)
-       -- local handle = io.popen("rsync -auv -i ~/.ssh/ev3-3.pub test1 robot@192.168.2.14:/home/robot")
        local result = handle:read("*a")
        print("result: " .. result)
        handle.close()

@@ -14,7 +14,7 @@ function M.exists(file)
 end
 
 function M.isdir(path)
-    return exists(path .. "/")
+    return M.exists(path .. "/")
 end
 
 function M.split_string (inputstr, sep)
