@@ -18,7 +18,7 @@ end
 function M.create_ev3_project()
     -- Create a new project for EV3
     -- Change pwd for nvim to projects directory
-    vim.cmd('cd ' .. _config.projects_dir)
+    vim.cmd("cd " .. _config.projects_dir)
     -- Ask user for project name
     vim.ui.input({
         prompt = "Enter project name: ",
@@ -73,6 +73,8 @@ function M.create_ev3_project()
         }, function(input)
             if input == "y" then
                 overwrite = true
+                -- Delete all existing project files
+                vim.cmd("!rm -rf " .. project_name .. "/*")
             else
                 overwrite = false
             end
@@ -83,17 +85,16 @@ function M.create_ev3_project()
     end
     -- If it's a new project: create project directory
     if new_project then
-        os.execute('mkdir ' .. project_name)
+        os.execute("mkdir " .. project_name)
     end
     -- Write project data for new project or overwrite existing project
-    -- TODO clear all files in case of existing project
     if new_project or overwrite then
         -- Write project file (.project.ini)
-        project_file = _config.projects_dir .. project_name .. '/.project.ini'
+        project_file = _config.projects_dir .. project_name .. "/.project.ini"
         pt.write_project_file(project_file, project_name,
                               username, host, interpreter)
         -- Write empty main file (main.py)
-        if (interpreter == 'python') then
+        if (interpreter == "python") then
             pt.write_main_python(_config.projects_dir, project_name)
         else
             pt.write_main_micro_python(_config.projects_dir, project_name)
@@ -106,11 +107,11 @@ end
 function M.open_ev3_project()
     -- Open an existing EV3 project
     -- Set pwd to projects directory
-    vim.cmd('cd ' .. _config.projects_dir)
+    vim.cmd("cd " .. _config.projects_dir)
     -- Get all project directories in projects directory
     dir_list = {}
-    for dir in io.popen('ls -d ' .. _config.projects_dir .. '*'):lines() do
-        table.insert(dir_list, vim.fn.fnamemodify(dir, ':t'))
+    for dir in io.popen("ls -d " .. _config.projects_dir .. "*"):lines() do
+        table.insert(dir_list, vim.fn.fnamemodify(dir, ":t"))
     end
     -- Let user select desired project
     vim.ui.select( dir_list, {
@@ -136,9 +137,9 @@ function M.upload_ev3_project()
     if (project_loaded == false) then
         print("First open an EV3-project!")
     else
-       local handle = io.popen('rsync -auv --exclude=.project.ini ' .. 
-                               project_name .. '/ ' .. user .. '@' .. host .. 
-                               ':/home/' .. user .. '/'  .. project_name)
+       local handle = io.popen("rsync -auv --exclude=.project.ini " .. 
+                               project_name .. "/ " .. user .. "@" .. host .. 
+                               ":/home/" .. user .. "/"  .. project_name)
        local result = handle:read("*a")
        print("result: " .. result)
        handle.close()
@@ -150,13 +151,13 @@ function M.run_ev3_project()
     if (project_loaded == false) then
         print("First open an EV3-project!")
     else
-        if (interpreter == 'python') then
-            os.execute('ssh ' .. user .. '@' .. host  .. ' python3 /home/' ..
-                       user .. '/' .. project_name .. '/main.py')
+        if (interpreter == "python") then
+            os.execute("ssh " .. user .. "@" .. host  .. " python3 /home/" ..
+                       user .. "/" .. project_name .. "/main.py")
         else
-            os.execute('ssh ' .. user .. '@' .. host  ..
-                       ' brickrun -r -- pybricks-micropython /home/' ..
-                       user .. '/' .. project_name .. '/main.py')
+            os.execute("ssh " .. user .. "@" .. host  ..
+                       " brickrun -r -- pybricks-micropython /home/" ..
+                       user .. "/" .. project_name .. "/main.py")
         end
         print("Done")
     end
@@ -167,9 +168,9 @@ function M.check_battery()
     if (project_loaded == false) then
         print("First open an EV3-project!")
     else
-        local bat_file = ':/sys/class/power_supply/lego-ev3-battery/voltage_now'
-        local handle = io.popen('scp -l 2000 ' .. user .. '@' .. host ..
-                                bat_file .. ' /dev/stdout 2> /dev/null')
+        local bat_file = ":/sys/class/power_supply/lego-ev3-battery/voltage_now"
+        local handle = io.popen("scp -l 2000 " .. user .. "@" .. host ..
+                                bat_file .. " /dev/stdout 2> /dev/null")
         local result = handle:read()
         result = tonumber(result) / 10e5
         print("Current battery voltage: " .. result .. " v")

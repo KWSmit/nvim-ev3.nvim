@@ -47,9 +47,20 @@ function M.write_main_python(base_projects_dir, project_name)
     "# Author:       \n" ..
     "# Version:      \n" ..
     "# Date:         \n" ..
-    "# \n"
-    main_file = base_projects_dir .. project_name .. '/main.py'
-    f = io.open(main_file, 'w')
+    "# \n" ..
+    "from ev3dev2.motor import (LargeMotor, MediumMotor,\n" ..
+    "                           MoveTank, MoveSteering, MoveJoystick\n" ..
+    "                           OUTPUT_A, OUTPUT_B, OUTPUT_C, OUTPUT_D)\n" ..
+    "from ev3dev2.sensor import INPUT_1, INPUT_2, INPUT_3, INPUT_4\n" ..
+    "from ev3dev2.sensor.lego import (TouchSensor, ColorSensor,\n" ..
+    "                                 UltrasonicSensor, InfraredSensor)\n" ..
+    "from ev3dev2.led import Leds\n" ..
+    "from ev3dev2.button import Button\n" ..
+    "from ev3dev2.sound import Sound\n" ..
+    "from ev3dev2.display import Display\n" ..
+    "\n"
+    main_file = base_projects_dir .. project_name .. "/main.py"
+    f = io.open(main_file, "w")
     f:write(python_code)
     io.close(f)
 end
@@ -80,8 +91,8 @@ function M.write_main_micro_python(base_projects_dir, project_name)
     "\n" ..
     "# Write your program here. \n" ..
     "ev3.speaker.beep()\n"
-    main_file = base_projects_dir .. project_name .. '/main.py'
-    f = io.open(main_file, 'w')
+    main_file = base_projects_dir .. project_name .. "/main.py"
+    f = io.open(main_file, "w")
     f:write(micro_python_code)
     io.close(f)
 end
