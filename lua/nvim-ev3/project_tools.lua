@@ -49,7 +49,7 @@ function M.write_main_python(base_projects_dir, project_name)
     "# Date:         \n" ..
     "# \n" ..
     "from ev3dev2.motor import (LargeMotor, MediumMotor,\n" ..
-    "                           MoveTank, MoveSteering, MoveJoystick\n" ..
+    "                           MoveTank, MoveSteering, MoveJoystick,\n" ..
     "                           OUTPUT_A, OUTPUT_B, OUTPUT_C, OUTPUT_D)\n" ..
     "from ev3dev2.sensor import INPUT_1, INPUT_2, INPUT_3, INPUT_4\n" ..
     "from ev3dev2.sensor.lego import (TouchSensor, ColorSensor,\n" ..

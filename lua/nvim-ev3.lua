@@ -130,6 +130,9 @@ function M.open_ev3_project()
             print "You cancelled"
         end
     end)
+    -- Open main file of chosen project
+   vim.cmd("e " .. project_name .. "/main.py")
+   vim.cmd("call feedkeys('<CR>')")
 end
 
 function M.upload_ev3_project()
