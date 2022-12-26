@@ -181,5 +181,19 @@ function M.check_battery()
     end
 end
 
+function M.open_terminal_ev3()
+    -- Open an SSH-terminal on the EV3, directly in project directory
+    -- Requires toggleterm plugin ('akinsho/toggleterm.nvim')
+    if (project_loaded == false) then
+        print("First open an EV3-project!")
+    else
+        local Terminal = require("toggleterm.terminal").Terminal
+        local cmd = "ssh -t " .. user .. "@" .. host .. " 'cd " .. "/home/" .. 
+                    user .. "/" .. project_name .. " ; bash'"
+        local terminal_ev3 = Terminal:new({ cmd = cmd, hidden = true })
+        terminal_ev3:toggle()
+    end
+end
+
 return M
 

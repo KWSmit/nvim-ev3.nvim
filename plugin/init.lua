@@ -31,3 +31,9 @@ vim.api.nvim_set_keymap("n",
                         { silent = true }
 )
 
+-- Open terminal on EV3
+vim.api.nvim_set_keymap("n",
+                        "<leader>et",
+                        ":lua require('nvim-ev3').open_terminal_ev3()<CR>",
+                        { silent = true }
+)
