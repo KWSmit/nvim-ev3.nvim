@@ -67,7 +67,6 @@ function M.write_project_file(project_file, project_name,
                               user, host, interpreter)
     -- Write data to project file
     f = io.open(project_file, "w")
-    io.output(f)
     if not user then
         user = ""
     end
@@ -79,7 +78,7 @@ function M.write_project_file(project_file, project_name,
     f:write("DIR=home/" .. user .. "/" .. project_name .. "\n")
     f:write("SCRIPT=main.py" .. "\n")
     f:write("INTERPRETER=" .. interpreter)
-    close(f)
+    f:close()
 end
 
 function M.read_project_file(project_file)
