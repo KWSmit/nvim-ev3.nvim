@@ -74,12 +74,12 @@ function M.write_project_file(project_file, project_name,
     if not host then
         host = ""
     end
-    io.write("USER=" .. user .. "\n")
-    io.write("HOST=" .. host .. "\n")
-    io.write("DIR=home/" .. user .. "/" .. project_name .. "\n")
-    io.write("SCRIPT=main.py" .. "\n")
-    io.write("INTERPRETER=" .. interpreter)
-    io.close(f)
+    f:write("USER=" .. user .. "\n")
+    f:write("HOST=" .. host .. "\n")
+    f:write("DIR=home/" .. user .. "/" .. project_name .. "\n")
+    f:write("SCRIPT=main.py" .. "\n")
+    f:write("INTERPRETER=" .. interpreter)
+    close(f)
 end
 
 function M.read_project_file(project_file)
