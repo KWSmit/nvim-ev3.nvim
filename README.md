@@ -17,7 +17,7 @@ your EV3.
 - To use the terminal function you have to install the
 [toggleterm](https://github.com/akinsho/toggleterm.nvim) nvim plugin.
 
-> **This plugin is momentarily tested on Linux only!**
+> **This plugin is tested on Linux (Pop!_OS 22.04) and Windows 10 only.**
 
 ## Installation
 
