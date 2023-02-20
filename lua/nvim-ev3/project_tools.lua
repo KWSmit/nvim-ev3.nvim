@@ -108,7 +108,7 @@ function M.write_main_file(interpreter, base_projects_dir, project_name)
         python_code = 
         "#!/user/bin/env python3 \n" ..
         "# \n" ..
-        "# Name:        main.py \n" ..
+        "# Name:        " .. project_name .. "/main.py \n" ..
         "# Description:  \n" ..
         "# Author:       \n" ..
         "# Version:      \n" ..
@@ -125,7 +125,7 @@ function M.write_main_file(interpreter, base_projects_dir, project_name)
         "from ev3dev2.sound import Sound\n" ..
         "from ev3dev2.display import Display\n" ..
         "\n"
-        main_file = base_projects_dir .. project_name .. "/main.py"
+        main_file = project_name .. "/main.py"
         f = io.open(main_file, "w")
         f:write(python_code)
         io.close(f)
@@ -133,7 +133,7 @@ function M.write_main_file(interpreter, base_projects_dir, project_name)
         micro_python_code = 
         "#!/usr/bin/env pybricks-micropython \n" ..
         "# \n" ..
-        "# Name:        main.py \n" ..
+        "# Name:        " .. project_name .. "/main.py \n" ..
         "# Description:  \n" ..
         "# Author:       \n" ..
         "# Version:      \n" ..
@@ -154,7 +154,7 @@ function M.write_main_file(interpreter, base_projects_dir, project_name)
         "\n" ..
         "# Write your program here. \n" ..
         "ev3.speaker.beep()\n"
-        main_file = base_projects_dir .. project_name .. "/main.py"
+        main_file = project_name .. "/main.py"
         f = io.open(main_file, "w")
         f:write(micro_python_code)
         io.close(f)
