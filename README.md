@@ -3,7 +3,7 @@
 Neovim lua-plugin for programming LEGO Mindstorms EV3 in nvim. With this plugin
 you can write your code locally on your PC and upload it to your EV3. You can
 also start programs and browse files on the EV3 from within nvim.
-For coding you can use python or micro-python.
+For coding you can use python or pybricks-micro-python.
 
 ## Requirements
 
@@ -53,7 +53,7 @@ which stores project-related information like:
 - `HOST` - Hostname or ip-address of your EV3.
 - `DIR` - The project directory on the EV3.
 - `SCRIPT` - The name of the script with the entrypoint of your project 
-  (always `main.py`).
+  (must be `main.py`).
 - `INTERPRETER` - The interpreter to be used (`python` or `micro-python`).
 
 This project-file is stored in the project directory.
@@ -98,6 +98,9 @@ the user is asked to overwrite existing project files or not.
 
 The startpoint of your program is `main.py`. This file is automatically created
 for your new project.
+
+When choosing `micro-python` as interpreter, it means that
+`pybricks-micro-python` will be used as interpreter.
 
 After creating a new project, all following commands are performed on this
 project.
